@@ -1,0 +1,218 @@
+Do it with **LoRA / QLoRA**, not full fine-tuning.
+
+Full fine-tuning is expensive and can damage the model’s existing abilities. IBM’s own guidance says LoRA/QLoRA are useful because they customize behavior while avoiding full-weight updates and reducing catastrophic forgetting risk. ([ibm.com][1])
+
+## Best practical path
+
+Use **Unsloth + LoRA** on `granite-4.0-h-tiny`.
+
+Why Unsloth? IBM’s Granite docs point to Unsloth for Granite fine-tuning, and Unsloth says Granite 4.0 Tiny can fit on a 15GB T4 GPU. ([ibm.com][2])
+
+Important: Granite 4.0 H-Tiny officially supports 12 languages, not Polish, but the model card explicitly says users may fine-tune Granite 4.0 models for additional languages. ([Hugging Face][3])
+
+---
+
+# The right goal
+
+Do **not** try to “teach Polish language completely.”
+
+That would require continued pretraining on a large Polish corpus — expensive and probably not worth it.
+
+Instead, fine-tune for a **specific Polish behavior**, for example:
+
+* Polish document classification
+* Polish metadata extraction
+* Polish RAG answer style
+* Polish customer-support replies
+* Polish procurement-document analysis
+* Polish summarization into structured bullets
+* Polish SQL/query explanation
+* Polish email/action-item extraction
+
+That is where this model can defend itself.
+
+---
+
+# Dataset format
+
+Create examples like this:
+
+```json
+{"instruction": "Wyodrębnij dane z tekstu i zwróć JSON.", "input": "Faktura nr FV/123/2026 z dnia 12.06.2026 na kwotę 4500 PLN dla firmy ABC Sp. z o.o.", "output": "{\"typ\":\"faktura\",\"numer\":\"FV/123/2026\",\"data\":\"2026-06-12\",\"kwota\":\"4500 PLN\",\"firma\":\"ABC Sp. z o.o.\"}"}
+{"instruction": "Sklasyfikuj wiadomość.", "input": "Klient prosi o pilny kontakt w sprawie błędu produkcyjnego.", "output": "pilne / wymaga odpowiedzi"}
+{"instruction": "Podsumuj tekst po polsku w 3 punktach.", "input": "Długi fragment dokumentu...", "output": "- Punkt 1\n- Punkt 2\n- Punkt 3"}
+```
+
+Start small:
+
+| Goal                  |      Examples |
+| --------------------- | ------------: |
+| Proof of concept      |       200–500 |
+| Useful internal model |   2,000–5,000 |
+| Strong narrow model   | 10,000–50,000 |
+
+For public Polish instruction data, you can look at Polish Alpaca-style datasets such as `Lajonbot/alpaca-dolly-chrisociepa-instruction-only-polish`, which has about 48.6k rows, or Polish LLM projects like SpeakLeash/Bielik and PLLuM for inspiration. ([Hugging Face][4])
+
+But your best dataset will be **your own task data**.
+
+---
+
+# Minimal Unsloth workflow
+
+Install:
+
+```bash
+pip install --upgrade unsloth datasets trl
+```
+
+Training skeleton:
+
+```python
+from datasets import load_dataset
+from unsloth import FastLanguageModel
+from trl import SFTTrainer
+from transformers import TrainingArguments
+
+model_name = "unsloth/granite-4.0-h-tiny"
+
+model, tokenizer = FastLanguageModel.from_pretrained(
+    model_name=model_name,
+    max_seq_length=2048,
+    load_in_4bit=True,
+)
+
+model = FastLanguageModel.get_peft_model(
+    model,
+    r=16,
+    lora_alpha=32,
+    lora_dropout=0.05,
+    bias="none",
+    use_gradient_checkpointing=True,
+)
+
+dataset = load_dataset("json", data_files="polish_train.jsonl", split="train")
+
+def format_example(example):
+    return {
+        "text": f"""<|start_of_role|>user<|end_of_role|>
+{example["instruction"]}
+
+{example.get("input", "")}
+<|end_of_text|>
+<|start_of_role|>assistant<|end_of_role|>
+{example["output"]}
+<|end_of_text|>"""
+    }
+
+dataset = dataset.map(format_example)
+
+trainer = SFTTrainer(
+    model=model,
+    tokenizer=tokenizer,
+    train_dataset=dataset,
+    dataset_text_field="text",
+    max_seq_length=2048,
+    args=TrainingArguments(
+        output_dir="granite4-tiny-h-polish-lora",
+        per_device_train_batch_size=1,
+        gradient_accumulation_steps=8,
+        learning_rate=2e-4,
+        num_train_epochs=2,
+        logging_steps=10,
+        save_steps=200,
+        fp16=True,
+        report_to="none",
+    ),
+)
+
+trainer.train()
+
+model.save_pretrained("granite4-tiny-h-polish-lora")
+tokenizer.save_pretrained("granite4-tiny-h-polish-lora")
+```
+
+This gives you a **LoRA adapter**, not a full new model.
+
+---
+
+# Evaluation before/after
+
+Make a small test set: 100–300 examples never used in training.
+
+Measure:
+
+| Task           | Metric                        |
+| -------------- | ----------------------------- |
+| Classification | accuracy / F1                 |
+| Extraction     | exact JSON field match        |
+| Summarization  | human score                   |
+| RAG answer     | faithfulness + source use     |
+| Polish quality | native-speaker review         |
+| Safety         | refusal / hallucination tests |
+
+For your use case, I would care most about:
+
+1. **Does it answer in Polish naturally?**
+2. **Does it keep JSON valid?**
+3. **Does it follow Polish instructions?**
+4. **Does it hallucinate less on Polish documents?**
+5. **Is it still faster and cheaper than bigger models?**
+
+If not, the fine-tune failed.
+
+---
+
+# Deployment
+
+For production, you have two options:
+
+## Option A — Serve base model + LoRA adapter
+
+Good for testing.
+
+Use Transformers / vLLM / SGLang depending on support.
+
+## Option B — Merge adapter and export
+
+Better for simple deployment.
+
+Then convert to GGUF if you want to run it locally through llama.cpp / Ollama-style tooling. The official GGUF repo exists for the base H-Tiny model, but your fine-tuned adapter would need its own merge/export path. ([Hugging Face][5])
+
+---
+
+# My recommendation for you
+
+For your first Polish fine-tune, do **not** make a general Polish chatbot.
+
+Build this:
+
+> **Polish enterprise document extractor**
+> Input: Polish email / PDF text / tender / contract fragment
+> Output: clean JSON with fields, summary, risks, action items.
+
+That is narrow, measurable, and useful.
+
+Example target output:
+
+```json
+{
+  "document_type": "zapytanie ofertowe",
+  "client": "XYZ Bank",
+  "deadline": "2026-07-15",
+  "required_products": ["watsonx.data", "OpenShift", "SQL Server integration"],
+  "risks": ["brak jasnych wymagań HA", "nieokreślony wolumen danych"],
+  "next_actions": [
+    "doprecyzować RTO/RPO",
+    "potwierdzić źródła danych",
+    "ustalić wymagania bezpieczeństwa"
+  ]
+}
+```
+
+That is exactly the kind of task where a small fine-tuned Granite can be valuable. Use the big model for reasoning; use Granite Tiny as the **fast Polish extraction worker**.
+
+[1]: https://www.ibm.com/think/tutorials/lora-fine-tuning-granite-llm "LoRA Fine-Tuning Granite LLM | IBM"
+[2]: https://www.ibm.com/granite/docs/fine-tune/unsloth "Fine-tune Granite using Unsloth | IBM Granite"
+[3]: https://huggingface.co/ibm-granite/granite-4.0-h-tiny "ibm-granite/granite-4.0-h-tiny · Hugging Face"
+[4]: https://huggingface.co/datasets/Lajonbot/alpaca-dolly-chrisociepa-instruction-only-polish?utm_source=chatgpt.com "Lajonbot/alpaca-dolly-chrisociepa-instruction-only-polish"
+[5]: https://huggingface.co/ibm-granite/granite-4.0-h-tiny-GGUF "ibm-granite/granite-4.0-h-tiny-GGUF · Hugging Face"
