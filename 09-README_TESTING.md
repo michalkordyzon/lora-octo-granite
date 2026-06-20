@@ -5,7 +5,8 @@ This directory contains a comprehensive test suite to evaluate Granite Tiny mode
 ## Files
 
 - **`polish_test_questions.jsonl`** - 20 diverse test questions covering different categories
-- **`test_polish_model.py`** - Python script to run tests and generate results
+- **`test_granite_polish.ipynb`** - **[RECOMMENDED]** Colab notebook for easy testing
+- **`test_polish_model.py`** - Python script for local GPU testing
 - **`README_TESTING.md`** - This file
 
 ## Test Categories
@@ -35,33 +36,51 @@ The test suite includes 20 questions across these categories:
 
 ## Usage
 
-### Step 1: Test Base Model (Before Fine-tuning)
+### Method 1: Google Colab (Recommended - No Local GPU Needed)
+
+**This is the easiest way to test the model!**
+
+1. **Upload to Colab:**
+   - Open Google Colab: https://colab.research.google.com
+   - Upload `test_granite_polish.ipynb`
+   - Upload `polish_test_questions.jsonl`
+
+2. **Test Base Model (Before Fine-tuning):**
+   - Select GPU runtime: Runtime → Change runtime type → GPU
+   - Run all cells
+   - Choose "Option A: Test Base Model"
+   - Download `results_before_finetuning.json`
+
+3. **Fine-tune the Model:**
+   - Use `granite_tiny_polish_finetuning_pro.ipynb` to fine-tune
+   - Save model to Google Drive
+
+4. **Test Fine-tuned Model (After Fine-tuning):**
+   - Open `test_granite_polish.ipynb` again
+   - Run all cells
+   - Choose "Option B: Test Fine-tuned Model"
+   - Download `results_after_finetuning.json`
+
+5. **Compare Results:**
+   - Compare the two JSON files manually
+   - Look for improvements in Polish fluency and accuracy
+
+### Method 2: Local Python Script (Requires Local GPU)
+
+Only use this if you have a CUDA-capable GPU locally.
 
 ```bash
+# Test base model
 python test_polish_model.py \
   --model unsloth/granite-4.0-h-tiny \
   --output results_before.json
-```
 
-### Step 2: Fine-tune the Model
+# Fine-tune (use Colab notebook)
 
-Follow the instructions in `granite_tiny_polish_finetuning_pro.ipynb` to fine-tune the model on your Polish dataset.
-
-### Step 3: Test Fine-tuned Model (After Fine-tuning)
-
-```bash
+# Test fine-tuned model
 python test_polish_model.py \
   --model granite4-tiny-h-polish-lora-pro \
   --output results_after.json
-```
-
-### Step 4: Compare Results
-
-```bash
-python compare_results.py \
-  --before results_before.json \
-  --after results_after.json \
-  --output comparison_report.md
 ```
 
 ## Command Line Options

@@ -2,42 +2,78 @@
 
 Complete guide and resources for fine-tuning IBM's Granite 4.0 H-Tiny model using LoRA on Google Colab for Polish language tasks.
 
-## 🚀 Quick Start
+## 📁 Project Files (Numbered Workflow)
 
-1. **Open the Colab notebook**: [`granite_tiny_polish_finetuning.ipynb`](granite_tiny_polish_finetuning.ipynb)
-2. **Upload your Polish training data** in JSONL format
-3. **Run all cells** (takes 30 minutes to 4 hours depending on dataset size)
-4. **Test your fine-tuned model** with Polish instructions
+### Dataset Preparation
+- **`01-convert_polish_dataset.py`** - Convert HuggingFace dataset to JSONL format
+- **`02-polish_train.jsonl`** - Training data (48,637 Polish examples)
+- **`08-README_DATASET_CONVERSION.md`** - Dataset conversion guide
+
+### Training Notebooks
+- **`03-granite_tiny_polish_finetuning_pro.ipynb`** - **[RECOMMENDED]** Colab Pro optimized (T4/V100/A100)
+- **`04-granite_tiny_polish_finetuning.ipynb`** - Free tier compatible (T4)
+- **`10-GRANITE_TINY_FINETUNING_GUIDE.md`** - Complete training guide
+
+### Testing & Evaluation
+- **`05-polish_test_questions.jsonl`** - 20 test questions (not in training data)
+- **`06-test_granite_polish.ipynb`** - **[RECOMMENDED]** Colab testing notebook
+- **`07-test_polish_model.py`** - Local GPU testing script
+- **`09-README_TESTING.md`** - Testing guide
+
+### Documentation
+- **`README.md`** - This file (project overview)
+- **`11-RESOURCE_ASSESSMENT.md`** - Resource requirements & costs
+- **`.gitignore`** - Git ignore rules
+
+## 🚀 Quick Start (3 Steps)
+
+### Step 1: Prepare Dataset (5 minutes)
+```bash
+python 01-convert_polish_dataset.py
+# Creates: 02-polish_train.jsonl (48,637 examples)
+```
+
+### Step 2: Fine-tune Model (1-2 hours on Colab Pro)
+1. Open `03-granite_tiny_polish_finetuning_pro.ipynb` in Google Colab
+2. Select GPU runtime (T4/V100/A100)
+3. Upload `02-polish_train.jsonl`
+4. Run all cells
+5. Download fine-tuned model
+
+### Step 3: Test & Compare (10 minutes)
+1. Open `06-test_granite_polish.ipynb` in Google Colab
+2. Test **before** fine-tuning (base model)
+3. Test **after** fine-tuning (your model)
+4. Compare results to measure improvement
 
 ## 📋 What's Included
 
-### 1. [Comprehensive Guide](GRANITE_TINY_FINETUNING_GUIDE.md)
-- Complete step-by-step instructions
-- Best practices and troubleshooting
-- Evaluation framework
-- Deployment options
-- Example use cases
-
-### 2. [Ready-to-Use Colab Notebook](granite_tiny_polish_finetuning.ipynb)
-- Pre-configured for T4 GPU
-- All code cells ready to run
+### 1. Complete Training Pipeline
+- Pre-configured Colab notebooks (free & Pro tiers)
+- 48K+ Polish training examples ready to use
+- Automatic model saving and deployment
 - Interactive testing included
-- Automatic model saving
 
-### 3. [Resource Assessment](RESOURCE_ASSESSMENT.md)
-- Detailed memory analysis
-- Training time estimates
-- Cost breakdown
-- GPU comparison
-- Optimization strategies
+### 2. Comprehensive Testing Suite
+- 20 diverse Polish test questions
+- Before/after comparison framework
+- Multiple task categories (grammar, translation, reasoning, etc.)
+- Automated result generation
+
+### 3. Detailed Documentation
+- Step-by-step guides for every stage
+- Resource requirements and cost analysis
+- Best practices and troubleshooting
+- Example use cases
 
 ## ✅ Key Features
 
 - **Free to Start**: Works on Google Colab free tier (T4 GPU)
-- **Fast Training**: 30 minutes to 4 hours depending on dataset
+- **Fast Training**: 1-2 hours on Pro tier (48K examples)
 - **Cost Effective**: $0-50/month vs. $1000s for alternatives
-- **Production Ready**: Can handle 10,000+ examples
+- **Production Ready**: Handles 10,000+ examples
 - **60-600x Cheaper**: Than GPT-4 for narrow Polish tasks
+- **Complete Testing**: Before/after comparison included
 
 ## 📊 Resource Requirements
 
@@ -48,10 +84,10 @@ Complete guide and resources for fine-tuning IBM's Granite 4.0 H-Tiny model usin
 - **Cost**: $0
 
 ### Recommended (Production)
-- **GPU**: A100 (40GB VRAM) - $50/month
-- **Dataset**: 10,000 examples
+- **GPU**: V100/A100 (16-40GB VRAM) - $10-50/month
+- **Dataset**: 10,000-50,000 examples
 - **Time**: 1-2 hours
-- **Cost**: $50/month
+- **Cost**: $10-50/month
 
 ## 🎯 Use Cases
 
@@ -78,11 +114,11 @@ Your training data should be in JSONL format:
 
 ### Dataset Size Recommendations
 
-| Goal | Examples | Training Time (T4) | Cost |
-|------|----------|-------------------|------|
-| Proof of concept | 200-500 | 30-60 min | $0 |
-| Useful internal model | 2,000-5,000 | 2-4 hours | $10/month |
-| Strong narrow model | 10,000-50,000 | 8-20 hours | $50/month |
+| Goal | Examples | Training Time (V100) | Cost |
+|------|----------|---------------------|------|
+| Proof of concept | 200-500 | 15-30 min | $0 (free tier) |
+| Useful internal model | 2,000-5,000 | 30-60 min | $10/month |
+| Strong narrow model | 10,000-50,000 | 1-3 hours | $50/month |
 
 ## 🔧 Technical Details
 
@@ -101,7 +137,7 @@ Your training data should be in JSONL format:
 
 ### Why LoRA?
 - ✅ **Memory Efficient**: Fits on free T4 GPU
-- ✅ **Fast Training**: 2-4 hours vs. days for full fine-tuning
+- ✅ **Fast Training**: 1-2 hours vs. days for full fine-tuning
 - ✅ **Low Risk**: Minimal catastrophic forgetting
 - ✅ **Small Adapters**: 50-200MB vs. 8GB full model
 - ✅ **Cost Effective**: $0-50 vs. $1000s
@@ -114,13 +150,19 @@ Your training data should be in JSONL format:
 - 500 examples: 30-60 minutes
 - 2,000 examples: 2-3 hours
 - 5,000 examples: 4-6 hours
-- 10,000 examples: 8-12 hours
+- 48,000 examples: 12-16 hours
+
+**V100 GPU (Pro):**
+- 500 examples: 15-30 minutes
+- 2,000 examples: 1-1.5 hours
+- 5,000 examples: 2-3 hours
+- 48,000 examples: 6-8 hours
 
 **A100 GPU (Pro+):**
 - 500 examples: 5-10 minutes
 - 2,000 examples: 20-30 minutes
 - 5,000 examples: 40-60 minutes
-- 10,000 examples: 1-2 hours
+- 48,000 examples: 2-3 hours
 
 ### Memory Usage (T4 with 4-bit)
 ```
@@ -136,64 +178,49 @@ Available on T4:           15.0 GB
 Safety Margin:             ~5.0 GB ✓
 ```
 
-## 🚦 Getting Started
+## 🚦 Detailed Workflow
 
-### Step 1: Prepare Your Data
+### Phase 1: Dataset Preparation
 
-Create a JSONL file with your Polish examples:
+```bash
+# Convert HuggingFace dataset to JSONL
+python 01-convert_polish_dataset.py
 
-```python
-import json
-
-data = [
-    {
-        "instruction": "Wyodrębnij dane z tekstu i zwróć JSON.",
-        "input": "Faktura nr FV/123/2026 z dnia 12.06.2026 na kwotę 4500 PLN dla firmy ABC Sp. z o.o.",
-        "output": '{"typ":"faktura","numer":"FV/123/2026","data":"2026-06-12","kwota":"4500 PLN","firma":"ABC Sp. z o.o."}'
-    },
-    # Add more examples...
-]
-
-with open('polish_train.jsonl', 'w', encoding='utf-8') as f:
-    for item in data:
-        f.write(json.dumps(item, ensure_ascii=False) + '\n')
+# Output: 02-polish_train.jsonl (48,637 examples)
+# See: 08-README_DATASET_CONVERSION.md for details
 ```
 
-### Step 2: Open Colab Notebook
+### Phase 2: Model Training
 
-1. Open [`granite_tiny_polish_finetuning.ipynb`](granite_tiny_polish_finetuning.ipynb) in Google Colab
-2. Select GPU runtime: Runtime → Change runtime type → GPU (T4)
-3. Upload your `polish_train.jsonl` file
+1. Open `03-granite_tiny_polish_finetuning_pro.ipynb` in Google Colab
+2. Select GPU runtime: Runtime → Change runtime type → GPU (T4/V100/A100)
+3. Upload `02-polish_train.jsonl`
+4. Run all cells (takes 1-2 hours on V100)
+5. Save model to Google Drive
 
-### Step 3: Run Training
+**See**: `10-GRANITE_TINY_FINETUNING_GUIDE.md` for complete training guide
 
-Simply run all cells in the notebook. The process will:
-1. Install dependencies (3-5 minutes)
-2. Load model (2-3 minutes)
-3. Prepare dataset (1 minute)
-4. Train model (30 minutes to 4 hours)
-5. Save adapter (1 minute)
-6. Test model (interactive)
+### Phase 3: Testing & Evaluation
 
-### Step 4: Evaluate and Deploy
+```bash
+# Option A: Use Colab notebook (RECOMMENDED)
+# 1. Open 06-test_granite_polish.ipynb in Colab
+# 2. Upload 05-polish_test_questions.jsonl
+# 3. Test base model → Download results_before.json
+# 4. Test fine-tuned model → Download results_after.json
+# 5. Compare results manually
 
-Test your model with Polish instructions and deploy using one of these options:
-- **Option A**: Load base model + adapter (good for testing)
-- **Option B**: Merge and export (good for production)
-- **Option C**: Convert to GGUF (good for local deployment)
+# Option B: Use local script (requires local GPU)
+python 07-test_polish_model.py \
+  --model unsloth/granite-4.0-h-tiny \
+  --output results_before.json
 
-## 📚 Documentation
+python 07-test_polish_model.py \
+  --model granite4-tiny-h-polish-lora-pro \
+  --output results_after.json
+```
 
-### Main Documents
-1. **[GRANITE_TINY_FINETUNING_GUIDE.md](GRANITE_TINY_FINETUNING_GUIDE.md)** - Complete guide with all details
-2. **[RESOURCE_ASSESSMENT.md](RESOURCE_ASSESSMENT.md)** - Detailed resource analysis
-3. **[granite_tiny_polish_finetuning.ipynb](granite_tiny_polish_finetuning.ipynb)** - Ready-to-use notebook
-
-### Quick References
-- [IBM Granite Documentation](https://www.ibm.com/granite/docs/)
-- [Unsloth Documentation](https://github.com/unslothai/unsloth)
-- [LoRA Paper](https://arxiv.org/abs/2106.09685)
-- [Granite Model Card](https://huggingface.co/ibm-granite/granite-4.0-h-tiny)
+**See**: `09-README_TESTING.md` for complete testing guide
 
 ## 💡 Best Practices
 
@@ -219,10 +246,33 @@ Test your model with Polish instructions and deploy using one of these options:
 
 ### 5. Monitor Training
 - Watch loss curves for overfitting
-- Test on held-out examples
+- Test on held-out examples (use `05-polish_test_questions.jsonl`)
 - Compare before/after performance
 
-## 🔍 Evaluation
+## 🔍 Evaluation Framework
+
+### Test Suite Included
+The project includes 20 diverse test questions covering:
+- Grammar correction
+- Translation (EN→PL)
+- Summarization
+- Math word problems
+- Classification
+- Question answering
+- Creative writing
+- Logical reasoning
+- Text formatting
+- Information extraction
+- Comparison
+- Instruction following
+- Sentiment analysis
+- Paraphrasing
+- Entity recognition
+- Definitions
+- Advice
+- Error detection
+- Story continuation
+- Factual knowledge
 
 ### Key Questions to Answer
 1. ✅ Does it answer in Polish naturally?
@@ -250,7 +300,8 @@ Test your model with Polish instructions and deploy using one of these options:
 |----------|-----|------|------|
 | POC (500 examples) | Free T4 | 30-60 min | $0 |
 | Development (2K examples) | Pro T4 | 2-3 hours | $10/month |
-| Production (10K examples) | Pro+ A100 | 1-2 hours | $50/month |
+| Production (48K examples) | Pro V100 | 6-8 hours | $10/month |
+| Production (48K examples) | Pro+ A100 | 2-3 hours | $50/month |
 
 ### Inference Costs
 
@@ -333,12 +384,21 @@ Wymagane produkty:
 
 This is exactly the kind of task where a small fine-tuned Granite can be valuable.
 
+## 📚 Documentation Index
+
+1. **`README.md`** (this file) - Project overview and quick start
+2. **`08-README_DATASET_CONVERSION.md`** - Dataset preparation guide
+3. **`09-README_TESTING.md`** - Testing and evaluation guide
+4. **`10-GRANITE_TINY_FINETUNING_GUIDE.md`** - Complete training guide
+5. **`11-RESOURCE_ASSESSMENT.md`** - Resource requirements and costs
+
 ## 📞 Support
 
 For issues or questions:
-1. Check the [Troubleshooting section](GRANITE_TINY_FINETUNING_GUIDE.md#troubleshooting)
-2. Review the [Resource Assessment](RESOURCE_ASSESSMENT.md)
+1. Check the troubleshooting sections in the guides
+2. Review the [Resource Assessment](11-RESOURCE_ASSESSMENT.md)
 3. Consult [IBM Granite Documentation](https://www.ibm.com/granite/docs/)
+4. Check [Unsloth Documentation](https://github.com/unslothai/unsloth)
 
 ## 📄 License
 
@@ -348,11 +408,11 @@ This guide and code are provided as-is for educational and commercial use.
 
 - IBM for Granite models
 - Unsloth for efficient fine-tuning
-- Hugging Face for model hosting
+- Hugging Face for model hosting and datasets
 - Google Colab for free GPU access
 
 ---
 
 **Last Updated**: 2026-06-20  
-**Version**: 1.0  
+**Version**: 2.0  
 **Status**: Production Ready ✅
