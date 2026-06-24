@@ -1,7 +1,7 @@
 # Fix for Notebook 06 Kernel Crash
 
 ## Problem
-The kernel crashes with "kernel restarted" errors when running [`06-test_granite_polish.ipynb`](06-test_granite_polish.ipynb:1). This is caused by **Out of Memory (OOM)** issues during model loading or inference.
+The kernel crashes with "kernel restarted" errors when running [`01-test_granite_polish.ipynb`](01-test_granite_polish.ipynb:1). This is caused by **Out of Memory (OOM)** issues during model loading or inference.
 
 ## Root Causes
 

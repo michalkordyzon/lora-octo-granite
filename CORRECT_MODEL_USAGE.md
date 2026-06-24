@@ -68,8 +68,8 @@ OUTPUT_FILE = "results_before_finetuning.json"
 Run the notebook → Download `results_before_finetuning.json`
 
 ### Phase 2: Fine-tune Model (Do This Next)
-1. Open `03-granite_tiny_polish_finetuning_pro.ipynb`
-2. Upload `02-polish_train.jsonl`
+1. Open `04-granite_tiny_polish_finetuning_pro.ipynb`
+2. Upload `03-polish_train.jsonl`
 3. Run all cells (takes 1-2 hours)
 4. Save model to Google Drive as `granite4-tiny-h-polish-lora-pro`
 

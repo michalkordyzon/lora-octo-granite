@@ -88,7 +88,7 @@ if found_models:
 else:
     print("\n❌ No granite models found in Google Drive")
     print("You need to fine-tune the model first using:")
-    print("  03-granite_tiny_polish_finetuning_pro.ipynb")
+    print("  04-granite_tiny_polish_finetuning_pro.ipynb")
 ```
 
 ## Solution 3: Test Base Model Instead
@@ -188,7 +188,7 @@ if model_exists:
 else:
     print("\n❌ Model not found at expected location")
     print("\nOptions:")
-    print("1. Fine-tune model first using 03-granite_tiny_polish_finetuning_pro.ipynb")
+    print("1. Fine-tune model first using 04-granite_tiny_polish_finetuning_pro.ipynb")
     print("2. Test base model instead: MODEL_NAME = 'unsloth/granite-4.0-h-tiny'")
     print("3. Check if model saved to different location (run search above)")
 

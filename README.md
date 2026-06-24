@@ -4,46 +4,51 @@ Complete guide and resources for fine-tuning IBM's Granite 4.0 H-Tiny model usin
 
 ## 📁 Project Files (Numbered Workflow)
 
+### Testing (Start Here!)
+- **`01-test_granite_polish.ipynb`** - **[START HERE]** Test base model on Polish tasks
+- **`06-polish_test_questions.jsonl`** - 20 diverse test questions
+- **`07-README_TESTING.md`** - Testing guide
+
 ### Dataset Preparation
-- **`01-convert_polish_dataset.py`** - Convert HuggingFace dataset to JSONL format
-- **`02-polish_train.jsonl`** - Training data (48,637 Polish examples)
-- **`08-README_DATASET_CONVERSION.md`** - Dataset conversion guide
+- **`02-convert_polish_dataset.py`** - Convert HuggingFace dataset to JSONL format
+- **`03-polish_train.jsonl`** - Training data (48,637 Polish examples)
+- **`10-README_DATASET_CONVERSION.md`** - Dataset conversion guide
 
 ### Training Notebooks
-- **`03-granite_tiny_polish_finetuning_pro.ipynb`** - **[RECOMMENDED]** Colab Pro optimized (T4/V100/A100)
-- **`04-granite_tiny_polish_finetuning.ipynb`** - Free tier compatible (T4)
-- **`10-GRANITE_TINY_FINETUNING_GUIDE.md`** - Complete training guide
-
-### Testing & Evaluation
-- **`05-polish_test_questions.jsonl`** - 20 test questions (not in training data)
-- **`06-test_granite_polish.ipynb`** - **[RECOMMENDED]** Colab testing notebook
-- **`07-test_polish_model.py`** - Local GPU testing script
-- **`09-README_TESTING.md`** - Testing guide
+- **`04-granite_tiny_polish_finetuning_pro.ipynb`** - **[RECOMMENDED]** Colab Pro optimized (T4/V100/A100)
+- **`05-granite_tiny_polish_finetuning.ipynb`** - Free tier compatible (T4)
+- **`08-GRANITE_TINY_FINETUNING_GUIDE.md`** - Complete training guide
 
 ### Documentation
 - **`README.md`** - This file (project overview)
-- **`11-RESOURCE_ASSESSMENT.md`** - Resource requirements & costs
+- **`09-RESOURCE_ASSESSMENT.md`** - Resource requirements & costs
 - **`.gitignore`** - Git ignore rules
 
 ## 🚀 Quick Start (3 Steps)
 
-### Step 1: Prepare Dataset (5 minutes)
+### Step 1: Test Base Model First (10 minutes) ⭐ START HERE
+1. Open `01-test_granite_polish.ipynb` in Google Colab
+2. Select GPU runtime (T4/V100/A100)
+3. Run all cells to test the base model
+4. Download `results_before_finetuning.json`
+
+### Step 2: Prepare Dataset (5 minutes)
 ```bash
-python 01-convert_polish_dataset.py
-# Creates: 02-polish_train.jsonl (48,637 examples)
+python 02-convert_polish_dataset.py
+# Creates: 03-polish_train.jsonl (48,637 examples)
 ```
 
-### Step 2: Fine-tune Model (1-2 hours on Colab Pro)
-1. Open `03-granite_tiny_polish_finetuning_pro.ipynb` in Google Colab
+### Step 3: Fine-tune Model (1-2 hours on Colab Pro)
+1. Open `04-granite_tiny_polish_finetuning_pro.ipynb` in Google Colab
 2. Select GPU runtime (T4/V100/A100)
-3. Upload `02-polish_train.jsonl`
+3. Upload `03-polish_train.jsonl`
 4. Run all cells
 5. Download fine-tuned model
 
-### Step 3: Test & Compare (10 minutes)
-1. Open `06-test_granite_polish.ipynb` in Google Colab
-2. Test **before** fine-tuning (base model)
-3. Test **after** fine-tuning (your model)
+### Step 4: Test Fine-tuned Model & Compare (10 minutes)
+1. Open `01-test_granite_polish.ipynb` again in Google Colab
+2. Use Option B to test your fine-tuned model
+3. Download `results_after_finetuning.json`
 4. Compare results to measure improvement
 
 ## 📋 What's Included
@@ -180,47 +185,43 @@ Safety Margin:             ~5.0 GB ✓
 
 ## 🚦 Detailed Workflow
 
-### Phase 1: Dataset Preparation
+### Phase 1: Test Base Model (Start Here!)
+
+1. Open `01-test_granite_polish.ipynb` in Google Colab
+2. Select GPU runtime: Runtime → Change runtime type → GPU (T4/V100/A100)
+3. Run all cells to test base model
+4. Download `results_before_finetuning.json`
+
+**See**: `07-README_TESTING.md` for complete testing guide
+
+### Phase 2: Dataset Preparation
 
 ```bash
 # Convert HuggingFace dataset to JSONL
-python 01-convert_polish_dataset.py
+python 02-convert_polish_dataset.py
 
-# Output: 02-polish_train.jsonl (48,637 examples)
-# See: 08-README_DATASET_CONVERSION.md for details
+# Output: 03-polish_train.jsonl (48,637 examples)
+# See: 10-README_DATASET_CONVERSION.md for details
 ```
 
-### Phase 2: Model Training
+### Phase 3: Model Training
 
-1. Open `03-granite_tiny_polish_finetuning_pro.ipynb` in Google Colab
+1. Open `04-granite_tiny_polish_finetuning_pro.ipynb` in Google Colab
 2. Select GPU runtime: Runtime → Change runtime type → GPU (T4/V100/A100)
-3. Upload `02-polish_train.jsonl`
+3. Upload `03-polish_train.jsonl`
 4. Run all cells (takes 1-2 hours on V100)
 5. Save model to Google Drive
 
-**See**: `10-GRANITE_TINY_FINETUNING_GUIDE.md` for complete training guide
+**See**: `08-GRANITE_TINY_FINETUNING_GUIDE.md` for complete training guide
 
-### Phase 3: Testing & Evaluation
+### Phase 4: Test Fine-tuned Model & Compare
 
-```bash
-# Option A: Use Colab notebook (RECOMMENDED)
-# 1. Open 06-test_granite_polish.ipynb in Colab
-# 2. Upload 05-polish_test_questions.jsonl
-# 3. Test base model → Download results_before.json
-# 4. Test fine-tuned model → Download results_after.json
-# 5. Compare results manually
+1. Open `01-test_granite_polish.ipynb` again in Google Colab
+2. Use Option B to test your fine-tuned model
+3. Download `results_after_finetuning.json`
+4. Compare the two JSON files to measure improvement
 
-# Option B: Use local script (requires local GPU)
-python 07-test_polish_model.py \
-  --model unsloth/granite-4.0-h-tiny \
-  --output results_before.json
-
-python 07-test_polish_model.py \
-  --model granite4-tiny-h-polish-lora-pro \
-  --output results_after.json
-```
-
-**See**: `09-README_TESTING.md` for complete testing guide
+**See**: `07-README_TESTING.md` for complete testing guide
 
 ## 💡 Best Practices
 
@@ -246,7 +247,7 @@ python 07-test_polish_model.py \
 
 ### 5. Monitor Training
 - Watch loss curves for overfitting
-- Test on held-out examples (use `05-polish_test_questions.jsonl`)
+- Test on held-out examples (use `06-polish_test_questions.jsonl`)
 - Compare before/after performance
 
 ## 🔍 Evaluation Framework
@@ -387,10 +388,10 @@ This is exactly the kind of task where a small fine-tuned Granite can be valuabl
 ## 📚 Documentation Index
 
 1. **`README.md`** (this file) - Project overview and quick start
-2. **`08-README_DATASET_CONVERSION.md`** - Dataset preparation guide
-3. **`09-README_TESTING.md`** - Testing and evaluation guide
-4. **`10-GRANITE_TINY_FINETUNING_GUIDE.md`** - Complete training guide
-5. **`11-RESOURCE_ASSESSMENT.md`** - Resource requirements and costs
+2. **`07-README_TESTING.md`** - Testing and evaluation guide
+3. **`08-GRANITE_TINY_FINETUNING_GUIDE.md`** - Complete training guide
+4. **`09-RESOURCE_ASSESSMENT.md`** - Resource requirements and costs
+5. **`10-README_DATASET_CONVERSION.md`** - Dataset preparation guide
 
 ## 📞 Support
 
